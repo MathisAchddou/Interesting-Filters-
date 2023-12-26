@@ -1,0 +1,59 @@
+import pandas as pd
+import numpy as np
+
+#1) Moving average filter: uses a moving average of the data points to smooth out short term fluctuations and highlight long term trends
+df = pd.DataFrame(np.random.randn(10,1))
+sma = df.rolling(3).mean()
+
+#2) Exponential smoothing filter: gives more weight to recent data points making it more responsive to changes in the underlying signals
+df = pd.DataFrame(np.random.randn(10,1))
+ewm_df = df.ewm(com=0.5).mean()
+
+#3) Kalman filter: uses a combination of math techs to estimate the state of a system based on a series of noisy measurements. It is commonly used for filtering data in the presence of random noises and model unsurtanty
+from pykalman import KalmanFilter
+kf = KalmanFilter(
+    transition_matrices=[[1,1], [0,1]],
+    observation_matrices=[[0.1,0.5], [-0.3,0.0]]
+)
+measurements = np.asarray([[1,0], [0,0], [0,1]])
+kf = kf.em(measurements, n_iter=5)
+
+filtered_state_means, filtered_state_covariances = kf.filter(measurements)
+
+
+#4) Butterworth : a type of low-pass filter that removes high frequency noises while preserving the low frequency signals
+from scipy.signal import butter, freqs
+
+b, a = butter(4, 100, 'low', analog=True)
+w, h = freqs(b,a)
+
+
+#5) Gaussian filter : uses a gaussian function to smooth the signal by averaging the data points within a certain range
+from scipy.ndimage import gaussian_filter
+
+a = np.arange(50, step=2).reshape((5,5))
+gf = gaussian_filter(a,sigma=1)
+
+
+#6) The median filter : replaces each data point with the median value of the data point in a certain range effectively removing outliers
+from scipy.signal import medfilt
+
+fit = medfilt([2,6,5,4,0,3,5,7,9,2,0,1], 5)
+
+#7) Wavelet filter : uses wavelet decomposition to seperate the signals into diff frequency bands allowing for the removal of specific frequency components
+import pywt
+
+cA, cD = pywt.dwt([1,2,3,4], 'dbl')
+
+#8) Savitzky-golay filter : uses a polynomial fitting method to smooth the signal while preserving the signals' shape and future's
+from scipy.signal import savgol_filter
+
+x = np.array([2,2,5,2,1,0,1,4,9])
+filtered = savgol_filter(x,5,2)
+
+
+#9) Fourier transform filter : uses the Fourier transform to convert the signal from the time domain to the frequency domain allowing for the removal of specific frequency components
+from scipy.fft import fft, ifft
+
+x = np.array([1.0,2.0,1.0,-1.0,1.5])
+y = fft(x)
